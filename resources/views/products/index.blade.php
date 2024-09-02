@@ -1,5 +1,5 @@
 {{-- call the main layout  --}}
-@extends('display')
+@extends('layout')
 {{-- for the titile of the page  --}}
 @section('title') Product Listing @parent @endsection
 {{-- additional style here intended for this blade  --}}
