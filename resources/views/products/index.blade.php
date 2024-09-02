@@ -1,139 +1,182 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
-    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
-        <symbol id="check-circle-fill" viewBox="0 0 16 16">
-          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-        </symbol>
-    </svg>
-</head>
-<body>
-<section>
-    <div class="container">
-        <h1 style="width: 100%; text-align:center;">Product List</h1>
-         <!-- Button to trigger the Create Product modal -->
-         <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createModal" style="float: right">Create New Product</button>
-        <table class="table">
+{{-- call the main layout  --}}
+@extends('display')
+{{-- for the titile of the page  --}}
+@section('title') Product Listing @parent @endsection
+{{-- additional style here intended for this blade  --}}
+@section('styles')
+@endsection
+{{-- for the content of the page  --}}
+@section('content')
+<div class="page-wrapper">
+    {{-- @include('site.layouts.component.clinic_sidebar') --}}
+    <h1 class="text-center pt-2 pb-2">Product List</h1>
+    <button class="btn btn-primary mb-3 float-end me-2" data-bs-toggle="modal" data-bs-target="#createModal">Create New Product</button>
+
+    {{-- table using DataTbales  --}}
+    <div class="ms-2 me-2">
+        <table id="table">
             <thead>
                 <tr>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th>Description</th>
-                    <th>Actions</th>
+                    <td>Product Name</td>
+                    <td>Price</td>
+                    <td>Discription</td>
+                    <td>Action</td>
                 </tr>
             </thead>
-            <tbody>
-            @if($products->isEmpty())
-                <tr>
-                    <td colspan="3">No products found.</td> <!-- colspan="3" spans across all table columns -->
-                </tr>
-            @else
-                @foreach ($products as $product)
-                    <tr>
-                        <td>{{ $product->name }}</td>
-                        <td>{{ $product->price }}</td>
-                        <td>{{ $product->description }}</td>
-                        <td>
-                             <!-- Edit Button to Open Modal -->
-                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal-{{ $product->id }}">Edit</button>
-
-                             <!-- Delete Form -->
-                             <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline-block;">
-                                 @csrf
-                                 @method('DELETE')
-                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
-                             </form>
-
-                             <!-- Edit Modal -->
-                             <div class="modal fade" id="editModal-{{ $product->id }}" tabindex="-1" aria-labelledby="editModalLabel-{{ $product->id }}" aria-hidden="true">
-                                 <div class="modal-dialog">
-                                     <div class="modal-content">
-                                         <div class="modal-header">
-                                             <h5 class="modal-title" id="editModalLabel-{{ $product->id }}">Edit Product</h5>
-                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                         </div>
-                                         <div class="modal-body">
-                                             <form action="{{ route('products.update', $product->id) }}" method="POST">
-                                                 @csrf
-                                                 @method('PUT')
-                                                 <div class="mb-3">
-                                                     <label for="name-{{ $product->id }}" class="form-label">Product Name:</label>
-                                                     <input type="text" class="form-control" id="name-{{ $product->id }}" name="name" value="{{ old('name', $product->name) }}" required>
-                                                 </div>
-                                                 <div class="mb-3">
-                                                     <label for="price-{{ $product->id }}" class="form-label">Price:</label>
-                                                     <input type="text" class="form-control" id="price-{{ $product->id }}" name="price" value="{{ old('price', $product->price) }}" required>
-                                                 </div>
-                                                 <div class="mb-3">
-                                                     <label for="description-{{ $product->id }}" class="form-label">Description:</label>
-                                                     <textarea class="form-control" id="description-{{ $product->id }}" name="description" required>{{ old('description', $product->description) }}</textarea>
-                                                 </div>
-                                                 <button type="submit" class="btn btn-primary">Update Product</button>
-                                             </form>
-                                         </div>
-                                     </div>
-                                 </div>
-                             </div>
-                             <!-- End of Edit Modal -->
-                        </td>
-                    </tr>
-                @endforeach
-            @endif
-            </tbody>
+            <tbody></tbody>
         </table>
-        @if(session('success'))
-                 <div class="alert alert-success d-flex align-items-center" role="alert">
-                     <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-                     {{ session('success') }}
-                   </div>
-                 @endif
-
-                 @if ($errors->any())
-                     <ul>
-                         @foreach ($errors->all() as $error)
-                             <li>{{ $error }}</li>
-                         @endforeach
-                     </ul>
-
-        @endif
     </div>
-</section>
-<!-- Create Modal -->
-<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createModalLabel">Create New Product</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="{{ route('products.store') }}" method="POST">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Product Name:</label>
-                        <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="price" class="form-label">Price:</label>
-                        <input type="text" class="form-control" id="price" name="price" value="{{ old('price') }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description:</label>
-                        <textarea class="form-control" id="description" name="description" required>{{ old('description') }}</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create Product</button>
-                </form>
-            </div>
-        </div>
-    </div>
+
+    @include('products.create_modal')
+    @include('products.edit_modal')
+
 </div>
-<!-- End of Create Modal -->
-</body>
-</html>
+@endsection
+
+@section('scripts')
+<script>
+    let productTable = $('#table').DataTable();
+    $(document).ready(function() {
+        getProduct();
+
+        $('#createProduct').on('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+            createProduct($(this));
+        });
+
+        $(document).on('click', '[data-bs-toggle="modal"]', function() {
+            // Get data attributes from the clicked button
+            const id = $(this).data('id');
+            const name = $(this).data('name');
+            const price = $(this).data('price');
+            const description = $(this).data('description');
+
+            // Set modal form action URL and fields
+            $('#editProductForm').data('id', id);
+            $('#modal-product-name').val(name);
+            $('#modal-product-price').val(price);
+            $('#modal-product-description').val(description);
+        });
+
+        $('#editProductForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+            updateProduct($(this));
+        });
+
+        $(document).on('click', '.deleteProduct', function() {
+            deleteProduct($(this));
+        });
+    });
+
+    function getProduct() {
+        $.ajax({
+            url: "{{ url('/product/list') }}",
+            type: 'GET',
+        }).then(function (response) {
+            productTable.clear().draw();
+            response.data.forEach(function (item) {
+                productTable.row.add([
+                    item.name,
+                    item.price,
+                    item.description,
+                    `
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-description="${item.description}" data-bs-target="#editModal">Edit</button>
+                        <button class="btn btn-sm btn-danger deleteProduct" data-id="${item.id}">Delete</button>
+                    `
+                ]).draw(false);
+            });
+        });
+    }
+
+    function createProduct() {
+        const data = {
+            name: $('#product-name').val(),
+            price: $('#product-price').val(),
+            description: $('#product-description').val(),
+            _token: '{{ csrf_token() }}'
+        };
+        $.ajax({
+            url: '/product/add', // Create URL
+            type: 'POST',
+            data: data,
+        }).then(function(response) {
+            if (response.productName) {
+                Swal.fire({
+                    title: 'Create Successful',
+                    text: `"${response.productName}" has been successfully added.`,
+                    icon: 'success',
+                    confirmButtonText: 'Close'
+                });
+            }
+            getProduct(); // Refresh the product list
+            $('#createModal').modal('hide'); // Hide the modal
+        });
+    }
+
+    function updateProduct(byVal) {
+        const id = byVal.data('id'); // Retrieve the stored product ID
+        const data = {
+            name: $('#modal-product-name').val(),
+            price: $('#modal-product-price').val(),
+            description: $('#modal-product-description').val(),
+            _token: '{{ csrf_token() }}'
+        };
+        console.log(id)
+        $.ajax({
+            url: `/products/update/${id}`, // Update URL based on the ID
+            type: 'PUT',
+            data: data,
+        }).then(function(response) {
+            if (response.productName) {
+                Swal.fire({
+                    title: 'Update Successful',
+                    text: `Product "${response.productName}" has been successfully updated.`,
+                    icon: 'success',
+                    confirmButtonText: 'Close'
+                });
+                getProduct(); // Refresh the product list
+                $('#editModal').modal('hide'); // Hide the modal
+            }
+            if (response.error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: response.error,
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                });
+            }
+        });
+    }
+
+    function deleteProduct(byVal){
+        const id = byVal.data('id'); // Retrieve the stored product ID
+        const data = {
+            _token: '{{ csrf_token() }}'
+        }
+        $.ajax({
+            url: `/products/delete/${id}`, // Delete URL based on the ID
+            type: 'DELETE',
+            data: data,
+        }).then(function(response) {
+            if (response.productName) {
+                Swal.fire({
+                    title: 'Remove Successful',
+                    text: `"${response.productName}" has been successfully removed.`,
+                    icon: 'success',
+                    confirmButtonText: 'Close'
+                });
+                getProduct(); // Refresh the product list
+            }
+            if (response.error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: response.error,
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                });
+            }
+        });
+    }
+</script>
+@endsection
 
