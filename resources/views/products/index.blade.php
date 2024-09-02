@@ -20,6 +20,7 @@
                     <td>Product Name</td>
                     <td>Price</td>
                     <td>Discription</td>
+                    <td>Date_Added</td>
                     <td>Action</td>
                 </tr>
             </thead>
@@ -75,10 +76,12 @@
         }).then(function (response) {
             productTable.clear().draw();
             response.data.forEach(function (item) {
+                let createdAt = new Date(item.created_at).toLocaleDateString('en-US');
                 productTable.row.add([
                     item.name,
                     item.price,
                     item.description,
+                    createdAt,
                     `
                         <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-description="${item.description}" data-bs-target="#editModal">Edit</button>
                         <button class="btn btn-sm btn-danger deleteProduct" data-id="${item.id}">Delete</button>
@@ -148,35 +151,51 @@
         });
     }
 
-    function deleteProduct(byVal){
-        const id = byVal.data('id'); // Retrieve the stored product ID
-        const data = {
-            _token: '{{ csrf_token() }}'
+    function deleteProduct(byVal) {
+    const id = byVal.data('id'); // Retrieve the stored product ID
+    const data = {
+        _token: '{{ csrf_token() }}'
+    };
+
+    // First, show a confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to delete this product? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, keep it'
+    }).then((result) => {
+        // If the user confirmed the deletion
+        if (result.isConfirmed) {
+            // Proceed with the AJAX request
+            $.ajax({
+                url: `/products/delete/${id}`, // Delete URL based on the ID
+                type: 'DELETE',
+                data: data,
+            }).then(function(response) {
+                if (response.productName) {
+                    Swal.fire({
+                        title: 'Remove Successful',
+                        text: `"${response.productName}" has been successfully removed.`,
+                        icon: 'success',
+                        confirmButtonText: 'Close'
+                    });
+                    getProduct(); // Refresh the product list
+                }
+                if (response.error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.error,
+                        icon: 'error',
+                        confirmButtonText: 'Close'
+                    });
+                }
+            });
         }
-        $.ajax({
-            url: `/products/delete/${id}`, // Delete URL based on the ID
-            type: 'DELETE',
-            data: data,
-        }).then(function(response) {
-            if (response.productName) {
-                Swal.fire({
-                    title: 'Remove Successful',
-                    text: `"${response.productName}" has been successfully removed.`,
-                    icon: 'success',
-                    confirmButtonText: 'Close'
-                });
-                getProduct(); // Refresh the product list
-            }
-            if (response.error) {
-                Swal.fire({
-                    title: 'Error',
-                    text: response.error,
-                    icon: 'error',
-                    confirmButtonText: 'Close'
-                });
-            }
-        });
-    }
+    });
+}
+
 </script>
 @endsection
 
