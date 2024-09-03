@@ -92,29 +92,51 @@
     }
 
     function createProduct() {
-        const data = {
-            name: $('#product-name').val(),
-            price: $('#product-price').val(),
-            description: $('#product-description').val(),
-            _token: '{{ csrf_token() }}'
-        };
-        $.ajax({
-            url: '/product/add', // Create URL
-            type: 'POST',
-            data: data,
-        }).then(function(response) {
-            if (response.productName) {
-                Swal.fire({
-                    title: 'Create Successful',
-                    text: `"${response.productName}" has been successfully added.`,
-                    icon: 'success',
-                    confirmButtonText: 'Close'
-                });
-            }
-            getProduct(); // Refresh the product list
-            $('#createModal').modal('hide'); // Hide the modal
+    const data = {
+        name: $('#name').val(),
+        price: $('#price').val(),
+        description: $('#description').val(),
+        _token: $('meta[name="csrf-token"]').attr('content')  // Make sure CSRF token is correct
+    };
+    $.ajax({
+        url: '/products/add',
+        type: 'POST',
+        data: data,
+    }).done(function(response) {
+        // If the request is successful and validation passes
+        Swal.fire({
+            title: 'Create Successful',
+            text: `"${response.productName}" has been successfully added.`,
+            icon: 'success',
+            confirmButtonText: 'Close'
         });
-    }
+        getProduct(); // Refresh the product list
+        $('#createModal').modal('hide'); // Hide the modal
+    }).fail(function(jqXHR) {
+        if (jqXHR.status === 422) {
+            // Handle validation errors
+            const errors = jqXHR.responseJSON.errors;
+            let errorMessage = '';
+            for (let field in errors) {
+                errorMessage += errors[field][0] + '\n'; // Get the first error message for each field
+            }
+            Swal.fire({
+                title: 'Validation Error',
+                text: errorMessage,
+                icon: 'error',
+                confirmButtonText: 'Close'
+            });
+        } else {
+            // Handle other errors
+            Swal.fire({
+                title: 'An error occurred',
+                text: 'Please try again later.',
+                icon: 'error',
+                confirmButtonText: 'Close'
+            });
+        }
+    });
+}
 
     function updateProduct(byVal) {
         const id = byVal.data('id'); // Retrieve the stored product ID
