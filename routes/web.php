@@ -9,3 +9,4 @@ Route::get('/product/list', [ProductController::class, 'getProduct']);
 Route::post('/products/add', [ProductController::class, 'createProduct']);
 Route::put('/products/update/{id}', [ProductController::class, 'updateProduct']);
 Route::delete('/products/delete/{id}', [ProductController::class, 'deleteProduct']);
+Route::get('/', [TestController::class, 'index']);
